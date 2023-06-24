@@ -8,7 +8,7 @@ pipeline {
 	}
 	stage('build'){
 	    steps {
-		sh 'docker build -t localhost:8082/repository/dockerhosted-repo/nginx:0.0.2'
+		sh 'docker build -t localhost:8082/repository/dockerhosted-repo/nginx:0.0.2 .'
 		}
   	}
         stage('publish') {
