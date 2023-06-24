@@ -11,7 +11,7 @@ pipeline {
 		sh 'docker build -t localhost:8082/repository/dockerhosted-repo/nginx:0.0.2'
 		}
   	}
-        stage('build') {
+        stage('publish') {
             steps {
                 sh 'docker login localhost:8082 --username admin --password abc123'
 		sh 'docker push localhost:8082/repository/dockerhosted-repo/nginx:0.0.2'
