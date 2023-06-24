@@ -2,7 +2,9 @@ pipeline {
     agent any
     stages {
 	stage('checkout') {
-	git branch: 'dev2', url: 'https://github.com/wyyd1999/myrepo.git'
+	     steps {
+		git branch: 'dev2', url: 'https://github.com/wyyd1999/myrepo.git'
+		}
 	}
 	stage('build'){
 	    steps {
