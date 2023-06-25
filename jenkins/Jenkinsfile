@@ -1,9 +1,9 @@
 pipeline {
     agent any
-    tools { 
-        maven '3.9.0' 
+    tools {
+        maven '3.9.0'
     }
-    environment { 
+    environment {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
         NEXUS_URL = "192.168.1.46:8081"
@@ -35,7 +35,6 @@ pipeline {
             steps {
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
                 }
-            }
         }
         stage("publish to nexus") {
             steps {
