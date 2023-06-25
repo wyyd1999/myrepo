@@ -36,7 +36,7 @@ pipeline {
                 // You can specify the path to your JAR file based on your Maven project structure
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
 
-                withCredentials([usernamePassword(credentialsId: ${COMMON_CREDS}, usernameVariable: ${COMMON_CREDS_USR}, passwordVariable: ${COMMON_CREDS_PSW})]) {
+                withCredentials([usernamePassword(credentialsId: '${COMMON_CREDS}', usernameVariable: 'admin', passwordVariable: 'abc123')]) {
                     // Upload JAR file to Nexus repository
                     nexusPublisher nexusInstanceId: 'nexus', nexusRepositoryId: 'mvn-andy', packages: [nexusMavenArtifact(
                         groupId: 'com.mycompany.app',
