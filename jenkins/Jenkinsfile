@@ -26,5 +26,12 @@ pipeline {
                 sh './jenkins/scripts/deliver.sh'
             }
         }
+        stage('Publish JAR') {
+            steps {
+                // Publish the generated JAR file
+                // You can specify the path to your JAR file based on your Maven project structure
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+        }
     }
 }
