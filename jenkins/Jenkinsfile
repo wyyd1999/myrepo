@@ -4,10 +4,11 @@ pipeline {
         maven '3.9.0' 
     }
     environment { 
-        buildid = "${env.BUILD_ID}"
-        buildnumber = "${env.BUILD_NUMBER}"
-        buildtag = "${env.BUILD_TAG}"
-        COMMON_CREDS = credentials('NEXUS_COMMON_CREDS')
+        NEXUS_VERSION = "nexus3"
+        NEXUS_PROTOCOL = "http"
+        NEXUS_URL = "192.168.1.46:8081"
+        NEXUS_REPOSITORY = "mvn-andy"
+        NEXUS_CREDENTIAL_ID = "NEXUS_COMMON_CREDS"
     }
     stages {
         stage('Build') {
@@ -32,22 +33,42 @@ pipeline {
         }
         stage('Publish JAR') {
             steps {
-                // Publish the generated JAR file
-                // You can specify the path to your JAR file based on your Maven project structure
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-
-                withCredentials([usernamePassword(credentialsId: 'NEXUS_COMMON_CREDS', usernameVariable: 'admin', passwordVariable: 'abc123')]) {
-                    // Upload JAR file to Nexus repository
-                    nexusPublisher nexusInstanceId: 'nexus', nexusRepositoryId: 'mvn-andy', packages: [nexusMavenArtifact(
-                        groupId: 'com.mycompany.app',
-                        version: '1.0.0',
-                        repositoryName: 'mvn-andy',
-                        artifact: [
-                            classifier: '',
-                            extension: 'jar',
-                            file: 'target/*.jar'
-                        ]
-                    )]
+                }
+            }
+        }
+        stage("publish to nexus") {
+            steps {
+                script {
+                    pom = readMavenPom file: "pom.xml";
+                    filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
+                    echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
+                    artifactPath = filesByGlob[0].path;
+                    artifactExists = fileExists artifactPath;
+                    if(artifactExists) {
+                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}";
+                        nexusArtifactUploader(
+                            nexusVersion: NEXUS_VERSION,
+                            protocol: NEXUS_PROTOCOL,
+                            nexusUrl: NEXUS_URL,
+                            groupId: pom.groupId,
+                            version: pom.version,
+                            repository: NEXUS_REPOSITORY,
+                            credentialsId: NEXUS_CREDENTIAL_ID,
+                            artifacts: [
+                                [artifactId: pom.artifactId,
+                                classifier: '',
+                                file: artifactPath,
+                                type: pom.packaging],
+                                [artifactId: pom.artifactId,
+                                classifier: '',
+                                file: "pom.xml",
+                                type: "pom"]
+                            ]
+                        );
+                    } else {
+                        error "*** File: ${artifactPath}, could not be found";
+                    }
                 }
             }
         }
