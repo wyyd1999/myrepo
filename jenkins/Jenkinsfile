@@ -7,8 +7,8 @@ pipeline {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
         NEXUS_URL = "192.168.1.46:8081"
-        NEXUS_REPOSITORY = "mvn-andy"
-        NEXUS_CREDENTIAL_ID = "NEXUS_COMMON_CREDS"
+        NEXUS_REPOSITORY = "repository-example"
+        NEXUS_CREDENTIAL_ID = "nexus-credentials"
     }
     stages {
         stage('Build') {
