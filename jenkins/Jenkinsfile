@@ -7,8 +7,8 @@ pipeline {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
         NEXUS_URL = "192.168.1.46:8081"
-        NEXUS_REPOSITORY = "repository-example"
-        NEXUS_CREDENTIAL_ID = "nexus-credentials"
+        NEXUS_REPOSITORY = "mvn-andy"
+        NEXUS_CREDENTIAL_ID = "NEXUS_COMMON_CREDS"
     }
     stages {
         stage('Build') {
@@ -71,18 +71,19 @@ pipeline {
                 }
             }
         }
+        stage('Sonarqube') {
+            environment {
+                scannerHome = tool 'SonarQubeScanner'
+            }
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh "${scannerHome}/bin/sonar-scanner"
+                }
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
     }
-    	stage('Sonarqube') {
-        	environment {
-            	scannerHome = tool 'SonarQubeScanner'
-        	}
-        	steps {
-            		withSonarQubeEnv('sonarqube') {
-                		sh "${scannerHome}/bin/sonar-scanner"
-            	}	
-            	timeout(time: 10, unit: 'MINUTES') {
-                	waitForQualityGate abortPipeline: true
-            	}
-        	}
-    	}
 }
+
