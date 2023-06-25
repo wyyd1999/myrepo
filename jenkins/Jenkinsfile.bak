@@ -13,16 +13,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-		withSonarQubeEnv('sonarqube') {
-                	sh 'mvn -B -DskipTests clean package sonar:sonar'
-		}
-            }
-        }
-        stage("Quality Gate") {
-            steps {
-              timeout(time: 10, unit: 'MINUTES') {
-                waitForQualityGate abortPipeline: true
-              }
+                sh 'mvn -B -DskipTests clean package'
             }
         }
         stage('Test') {
@@ -77,6 +68,19 @@ pipeline {
                     } else {
                         error "*** File: ${artifactPath}, could not be found";
                     }
+                }
+            }
+        }
+        stage('Sonarqube') {
+            environment {
+                scannerHome = tool 'SonarQubeScanner'
+            }
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=category-service -Dsonar.java.libraries=**/*.jar -Dsonar.projectVersion=${BUILD_NUMBER}"
+                }
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
                 }
             }
         }
