@@ -3,6 +3,10 @@ pipeline {
     tools {
         maven '3.9.0'
     }
+    options { 
+    	buildDiscarder(logRotator(numToKeepStr: '10'))
+	disableConcurrentBuilds()
+    }
     environment {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
