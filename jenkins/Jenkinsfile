@@ -3,6 +3,9 @@ pipeline {
     tools {
         maven '3.9.0'
     }
+    triggers {
+        cron('H 18 * * *')
+    }
     options { 
     	buildDiscarder(logRotator(numToKeepStr: '10'))
 	disableConcurrentBuilds()
