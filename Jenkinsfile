@@ -29,14 +29,31 @@ pipeline {
                 sh 'make test'
             }
         }
-        stage('Deploy') {
+        stage('BuildDocker') {
             when {
               expression {
                 currentBuild.result == null || currentBuild.result == 'SUCCESS'
               }
             }
             steps {
-                sh 'docker build -t hello_world_app .'
+                sh 'docker build -t wyyd1999/hello_world_app:latest .'
+            }
+        }
+        stage('PushDocker') {
+            when {
+              expression {
+                currentBuild.result == null || currentBuild.result == 'SUCCESS'
+              }
+            }
+            steps {
+                sh 'docker push wyyd1999/hello_world_app:latest'
+            }
+        }
+        stage('DeployDocker') {
+            steps {
+                sh 'docker pull wyyd1999/hello_world_app:latest'
+                sh 'docker rm -f hello_world_container'
+                sh 'docker run -d --name hello_world_container wyyd1999/hello_world_app:latest'
             }
         }
     }
@@ -46,7 +63,7 @@ pipeline {
           subject: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
           body: """<p>FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
             <p>Please check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
-          to: 'engineer@shabodi.com'
+          to: 'wyyd1999@gmail.com'
         )
         bitbucketStatusNotify(
                 buildState: 'FAILED',
