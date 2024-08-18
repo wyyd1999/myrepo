@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+    triggers {
+        cron('H 23 * * *')
+    }
+    environment { 
+        buildid = "${env.BUILD_ID}"
+        buildnumber = "${env.BUILD_NUMBER}"
+        buildtag = "${env.BUILD_TAG}"
+        PYTHON_ENV = 'my_venv'
+    }
+    stages {
+        stage('checkout') {
+             steps {
+                git branch: 'main', url: 'https://github.com/wyyd1999/myrepo.git'
+            }
+        }
+        stage('Set Up Python Environment') {
+            steps {
+                sh 'python3 -m venv ${PYTHON_ENV}'
+                sh '. ${PYTHON_ENV}/bin/activate'
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                sh '. ${PYTHON_ENV}/bin/activate && pip install pytest'
+            }
+        }
+        stage('Run Tests') {
+            steps {
+                sh '. ${PYTHON_ENV}/bin/activate && pytest --junitxml=reports/results.xml || true'
+            }
+        }
+    }
+    post {
+    failure {
+      emailext (
+          subject: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+          body: """<p>FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+            <p>Please check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
+          to: 'wyyd1999@gmail.com'
+        )
+        bitbucketStatusNotify(
+                buildState: 'FAILED',
+                repoSlug: 'aep',
+                commitId: env.GIT_COMMIT
+        )
+    }
+    success {
+        bitbucketStatusNotify(
+                buildState: 'SUCCESSFUL',
+                repoSlug: 'aep',
+                commitId: env.GIT_COMMIT
+        )
+        }
+  }
+}
