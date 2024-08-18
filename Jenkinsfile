@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    triggers {
+        cron('H 23 * * *')
+    }
     environment { 
         buildid = "${env.BUILD_ID}"
         buildnumber = "${env.BUILD_NUMBER}"
