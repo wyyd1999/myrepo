@@ -1,5 +1,5 @@
 ## Release Notes
-- My App - Version [0.0.2]
+- My App - Version [0.0.3]
 - Release Date: [08 18, 2024]
 
 ## Overview
